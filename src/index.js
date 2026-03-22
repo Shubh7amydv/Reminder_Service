@@ -1,35 +1,35 @@
-const express=require('express');
-const bodyparser=require('body-parser');
 
-const { PORT } = require('./Config/serverconfig');
+require('dotenv').config();
+const express = require('express');
+
+
+const bodyParser = require('body-parser');
+
+const {PORT} = require('./Config/serverConfig'); 
+
+const {sendBasicEmail} = require('./services/email-service');
+
 const cron = require('node-cron');
 
-const { sendBasicEmail }=require('./Services/email-services')
+const setupAndStartServer = () =>
+{
+    const app = express();  
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({ extended: true }));
+    app.listen(PORT, async () =>
+    {
+        console.log(`Server is running on port ${PORT}`);
 
-
-const setUpAndStartServer = () =>{
-    const app=express();
-
-    app.use(bodyparser.json());
-    app.use(bodyparser.urlencoded({extended: true}));
-
-
-  
-    app.listen(PORT, () => {
-        console.log(`server started at ${PORT}`);
+        // sendBasicEmail(
+        //     'support@airline.com', 
+        //     'user@example.com', 
+        //     'Welcome to Airline Management System', 
+        //     'Thank you for registering with us. We are excited to have you on board!');
+        
+        cron.schedule('*/2 * * * *', async () => {
+            console.log('running a task every two minutes')
+        });
     });
+}   
 
-    // ✅ Cron Job Setup
-    cron.schedule('* * * * *', async () => {
-        console.log("⏰ Running cron job...");
-
-        await sendBasicEmail(
-            "",
-            "Cron Email",
-            "This email is sent every minute"
-        );
-    });
-
-}
-
-setUpAndStartServer();
+setupAndStartServer();
